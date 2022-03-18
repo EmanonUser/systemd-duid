@@ -2,6 +2,7 @@
 
 import hmac
 import hashlib
+import binascii
 from csiphash24 import siphash24
 
 mac_address: str = "ff:ff:ff:ff:ff:ff"                          # Your NIC Mac Address | YOU NEED TO ADD YOUR OWN
@@ -30,14 +31,19 @@ def generate_duid_llt(mac_address: str) -> str:
 def generate_duid_uuid(machine_id: str, application_id_uuid: str) -> str:
     """ DUID_UUID is generated using a combination of your machine-id plus an application-id
     both are supposed to be stable and feed into an hmac function see man sd_id128_get_machine_app_specific
-    I suppose its done to hide the machine-id """
+    I suppose its done to hide the machine-id some bytes are swapped too """
     duid_type_uuid: str = '0004'
 
     machine_id = bytes.fromhex(machine_id)
     application_id_uuid = bytes.fromhex(application_id_uuid)
 
     res: hmac.HMAC = hmac.new(machine_id, application_id_uuid, digestmod=hashlib.sha256) # From https://github.com/systemd/systemd/blob/a420d71793bcbc1539a63be60f83cdc14373ea4a/src/libsystemd/sd-id128/sd-id128.c#L279
-    return duid_type_uuid + res.hexdigest()[:32]    
+    res: str = res.hexdigest()[:32]
+    res: bytearray = bytearray(binascii.unhexlify(res))
+
+    res[6]: bytearray = (res[6] & 0x0f) | 0x40                 # From https://github.com/systemd/systemd/blob/a420d71793bcbc1539a63be60f83cdc14373ea4a/src/libsystemd/sd-id128/id128-util.c#L196
+    res[8]: bytearray = (res[8] & 0x3F) | 0x80
+    return duid_type_uuid + res.hex()
 
 def generate_duid_en(machine_id: str, app_id: str) -> str:
     """ DUID_EN seems to be the same as DUID_UUID but using different hashing
