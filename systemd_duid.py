@@ -9,11 +9,11 @@ hash_key_uuid: str = "80118cc2fe4a03ee3ed60c6f363914090a"       # From https://g
 application_id_uuid: str = "a50ad112bf604577a2fb741ab1955b03"   # From https://github.com/systemd/systemd/blob/a420d71793bcbc1539a63be60f83cdc14373ea4a/src/libsystemd-network/dhcp-identifier.c#L21
 
 def add_duid_colons(func):
-	def colons(*args, **kwargs):
-		res = func(*args, **kwargs)
-		res = ":".join([ a+b for a,b in zip(res[::2], res[1::2])])
+	def inner(*args, **kwargs) -> str:
+		res: str = func(*args, **kwargs)
+		res: str = ":".join([ a+b for a,b in zip(res[::2], res[1::2])])
 		return res
-	return colons
+	return inner
 
 @add_duid_colons
 def generate_duid_llt(mac_address: str) -> str:
