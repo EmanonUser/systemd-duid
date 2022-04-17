@@ -72,7 +72,9 @@ def get_machine_id(machine_id_path='/etc/machine-id') -> str:
         return machine_id_file.read()
 
 machine_id: str = get_machine_id()
-print(f'systemd-netwokd DUID_LLT:   { generate_duid_llt(mac_address) }')
-print(f'systemd-netwokd DUID_EN:    { generate_duid_en(machine_id, hash_key_uuid )}')
-print(f'systemd-netwokd DUID_LL:    { generate_duid_ll(mac_address) }')
-print(f'systemd-netwokd DUID_UUID:  { generate_duid_uuid(machine_id, application_id_uuid) }')
+
+print('systemd-networkd DHCPv6 DUID(s) by type:')
+print(f'DUID_LLT:   { generate_duid_llt(mac_address) }')
+print(f'DUID_EN:    { generate_duid_en(machine_id, hash_key_uuid) }')
+print(f'DUID_LL:    { generate_duid_ll(mac_address) }')
+print(f'DUID_UUID:  { generate_duid_uuid(machine_id, application_id_uuid) }')
